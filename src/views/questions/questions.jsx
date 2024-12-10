@@ -140,6 +140,12 @@ export default function QuestionIndex() {
         XLSX.writeFile(workbook, 'questions.xlsx');
     };
 
+    const pilihanLabels = {
+        1: 'Ice Cream',
+        2: 'Milk',
+        3: 'Candy'
+    };
+
     const counter = useSelector((state) => state.dodol);
     const dispatch = useDispatch();
 
@@ -174,6 +180,7 @@ export default function QuestionIndex() {
                                             )}
                                         </th>
                                         <th scope="col">Question</th>
+                                        <th scope="col">Pilihan</th>
                                         <th scope="col" style={{ 'width': '15%' }}>Actions</th>
                                     </tr>
                                 </thead>
@@ -185,6 +192,9 @@ export default function QuestionIndex() {
                                             </td>
                                             <td>{question.title}</td>
                                             <td>{question.question}</td>
+                                            <td>{question.pilihan && question.pilihan.split(',').map((item, idx) => (
+                                                <span key={idx} className="badge bg-info me-1">{pilihanLabels[item]}</span>
+                                            ))}</td>
                                             <td className="text-center">
                                                 <Link to={`/questions/edit/${question.id}`} className="btn btn-sm btn-primary rounded-sm shadow border-0 me-2">EDIT</Link>
                                                 <button onClick={() => deleteQuestion(question.id)} className="btn btn-sm btn-danger rounded-sm shadow border-0">DELETE</button>

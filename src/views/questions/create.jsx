@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 //import useNavigate
 import { useNavigate } from 'react-router-dom';
+import { CFormCheck } from '@coreui/react'
 
 //import API
 import api from 'src/api/api';
@@ -14,6 +15,9 @@ export default function QuestionCreate() {
     const [image, setImage] = useState('');
     const [title, setTitle] = useState('');
     const [question, setQuestion] = useState('');
+    const [pilihan1, setPilihan1] = useState(false);
+    const [pilihan2, setPilihan2] = useState(false);
+    const [pilihan3, setPilihan3] = useState(false);
 
     //state validation
     const [errors, setErrors] = useState([]);
@@ -38,6 +42,12 @@ export default function QuestionCreate() {
         formData.append('image', image);
         formData.append('title', title);
         formData.append('question', question);
+        const pilihan = [];
+        if (pilihan1) pilihan.push(1);
+        if (pilihan2) pilihan.push(2);
+        if (pilihan3) pilihan.push(3);
+        const pilihanString = pilihan.join(',');
+        formData.append('pilihan', pilihanString);
 
         // Send data with API
         try {
@@ -120,6 +130,53 @@ export default function QuestionCreate() {
                                             </div>
                                         )
                                     }
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Pilihan</label>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="form-check d-inline-block me-3">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="checkbox1"
+                                            checked={pilihan1}
+                                            onChange={(e) => setPilihan1(e.target.checked)}
+                                        />
+                                        <label className="form-check-label" htmlFor="checkbox1">
+                                            Ice Cream
+                                        </label>
+                                    </div>
+
+                                    <div className="form-check d-inline-block me-3">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="checkbox2"
+                                            name="pilihan2"
+                                            checked={pilihan2}
+                                            onChange={(e) => setPilihan2(e.target.checked)}
+                                        />
+                                        <label className="form-check-label" htmlFor="checkbox2">
+                                            Milk
+                                        </label>
+                                    </div>
+
+                                    <div className="form-check d-inline-block me-3">
+                                        <input
+                                            className="form-check-input"
+                                            type="checkbox"
+                                            id="checkbox3"
+                                            name="pilihan3"
+                                            checked={pilihan3}
+                                            onChange={(e) => setPilihan3(e.target.checked)}
+                                        />
+                                        <label className="form-check-label" htmlFor="checkbox3">
+                                            Candy
+                                        </label>
+                                    </div>
+
                                 </div>
 
                                 <button type="submit" className="btn btn-md btn-primary rounded-sm shadow border-0">Save</button>
