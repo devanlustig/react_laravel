@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 //import API
 import api from 'src/api/api';
 import Swal from 'sweetalert2';
+import Select from 'react-select';
 
 export default function QuestionEdit() {
 
@@ -14,6 +15,8 @@ export default function QuestionEdit() {
     const [title, setTitle] = useState('');
     const [question, setQuestion] = useState('');
     const [pilihan, setPilihan] = useState([]);
+    const [produkList, setProdukList] = useState([]);
+    const [selectedProduk, setSelectedProduk] = useState(null);
 
     //state validation
     const [errors, setErrors] = useState([]);
@@ -23,6 +26,27 @@ export default function QuestionEdit() {
     //useNavigate
     const navigate = useNavigate();
     const { id } = useParams();
+
+    const fetchProduk = async () => {
+        try {
+            const response = await api.get(`/api/getMasterProduk`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+
+            if (Array.isArray(response.data.data)) {
+                setProdukList(response.data.data);
+            } else {
+                console.log("Data received is not an array:", response.data.data);
+                setProdukList([]); 
+            }
+
+        } catch (error) {
+            console.log("Error fetching master produk:", error);
+            setProdukList([]);
+        }
+    };
 
     const fetchDetailQuestion = async () => {
         try {
@@ -49,6 +73,10 @@ export default function QuestionEdit() {
             setImage(response.data.data.image);
             const pilihanArray = response.data.data.pilihan.split(',').map(Number);
             setPilihan(pilihanArray);
+            setSelectedProduk({
+                value: response.data.data.produk_id,
+                label: response.data.data.produk_id  // Make sure produk_name is part of the response
+            });
 
             Swal.close();
 
@@ -59,6 +87,7 @@ export default function QuestionEdit() {
     }
 
     useEffect(() => {
+        fetchProduk();
         fetchDetailQuestion();
     }, []);
 
@@ -69,6 +98,15 @@ export default function QuestionEdit() {
     const handleFileChange = (e) => {
         setImage(e.target.files[0]);
     }
+
+    const handleSelectProduk = (selectedOption) => {
+        setSelectedProduk(selectedOption);
+    };
+
+    const formattedProdukList = produkList.map(produk => ({
+        value: produk.id,
+        label: produk.nama_produk,
+    }));
 
     const handleCheckboxChange = (e) => {
         const { value, checked } = e.target;
@@ -95,6 +133,7 @@ export default function QuestionEdit() {
         formData.append('question', question);
         const pilihanString = pilihan.length > 0 ? pilihan.join(',') : '';
         formData.append('pilihan', pilihanString);
+        formData.append('produk_id', selectedProduk ? selectedProduk.value : '');
 
         formData.append('_method', 'PUT')
 
@@ -213,6 +252,19 @@ export default function QuestionEdit() {
                                             Candy
                                         </label>
                                     </div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Pilih Produk</label>
+                                    <Select
+                                        options={formattedProdukList}
+                                        onChange={handleSelectProduk}
+                                        value={selectedProduk}
+                                        placeholder="Cari Produk..."
+                                        isClearable
+                                        isSearchable
+                                        noOptionsMessage={() => 'Tidak ada produk ditemukan'}
+                                    />
                                 </div>
 
                                 <button type="submit" className="btn btn-md btn-primary rounded-sm shadow border-0">Update</button>

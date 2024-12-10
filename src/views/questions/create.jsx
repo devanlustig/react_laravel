@@ -1,9 +1,10 @@
 //import useState
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 //import useNavigate
 import { useNavigate } from 'react-router-dom';
 import { CFormCheck } from '@coreui/react'
+import Select from 'react-select';
 
 //import API
 import api from 'src/api/api';
@@ -18,6 +19,9 @@ export default function QuestionCreate() {
     const [pilihan1, setPilihan1] = useState(false);
     const [pilihan2, setPilihan2] = useState(false);
     const [pilihan3, setPilihan3] = useState(false);
+    const [produkList, setProdukList] = useState([]);
+    const [selectedProduk, setSelectedProduk] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     //state validation
     const [errors, setErrors] = useState([]);
@@ -30,6 +34,40 @@ export default function QuestionCreate() {
     const handleFileChange = (e) => {
         setImage(e.target.files[0]);
     }
+
+    useEffect(() => {
+        const fetchProduk = async () => {
+            try {
+                const response = await api.get(`/api/getMasterProduk`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (Array.isArray(response.data.data)) {
+                    setProdukList(response.data.data);
+                } else {
+                    console.log("Data received is not an array:", response.data.data);
+                    setProdukList([]); 
+                }
+
+            } catch (error) {
+                console.log("Error fetching master produk:", error);
+                setProdukList([]);
+            }
+        };
+
+        fetchProduk();
+    }, []);
+
+    const handleSelectProduk = (selectedOption) => {
+        setSelectedProduk(selectedOption ? selectedOption.value : '');
+    };
+
+    const formattedProdukList = produkList.map(produk => ({
+        value: produk.id,
+        label: produk.nama_produk,
+    }));
 
     //method store question
     const storeQuestion = async (e) => {
@@ -48,6 +86,9 @@ export default function QuestionCreate() {
         if (pilihan3) pilihan.push(3);
         const pilihanString = pilihan.join(',');
         formData.append('pilihan', pilihanString);
+        if (selectedProduk) {
+            formData.append('produk_id', selectedProduk);
+        }
 
         // Send data with API
         try {
@@ -133,7 +174,7 @@ export default function QuestionCreate() {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="form-label fw-bold">Pilihan</label>
+                                    <label className="form-label fw-bold">Pilih Cemilan</label>
                                 </div>
                                 <div className="mb-3">
                                     <div className="form-check d-inline-block me-3">
@@ -176,7 +217,19 @@ export default function QuestionCreate() {
                                             Candy
                                         </label>
                                     </div>
+                                </div>
 
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold">Pilih Produk</label>
+                                    <Select
+                                        options={formattedProdukList}
+                                        onChange={handleSelectProduk}
+                                        value={formattedProdukList.find(option => option.value === selectedProduk)}
+                                        placeholder="Cari Produk..."
+                                        isClearable
+                                        isSearchable
+                                        noOptionsMessage={() => 'Tidak ada produk ditemukan'}
+                                    />
                                 </div>
 
                                 <button type="submit" className="btn btn-md btn-primary rounded-sm shadow border-0">Save</button>
