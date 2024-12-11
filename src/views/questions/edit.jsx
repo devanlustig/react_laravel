@@ -62,7 +62,7 @@ export default function QuestionEdit() {
                 }
             });
 
-            const response = await api.get(`/api/questions/${id}`, {
+            const response = await api.get(`/api/getQuestionsProduk/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
                 }
@@ -71,11 +71,11 @@ export default function QuestionEdit() {
             setTitle(response.data.data.title);
             setQuestion(response.data.data.question);
             setImage(response.data.data.image);
-            const pilihanArray = response.data.data.pilihan.split(',').map(Number);
+            const pilihanArray = response.data.data.pilihan ? response.data.data.pilihan.split(',').map(Number) : [];
             setPilihan(pilihanArray);
             setSelectedProduk({
                 value: response.data.data.produk_id,
-                label: response.data.data.produk_id  // Make sure produk_name is part of the response
+                label: response.data.data.nama_produk
             });
 
             Swal.close();
